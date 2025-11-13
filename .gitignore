@@ -52,10 +52,8 @@ dmypy.json
 
 # Quill-specific
 config.yaml      # User configuration (sensitive)
-models/*         # Downloaded Whisper models (large files)
-!models/.gitkeep # Keep directory structure in repo
-logs/*           # Application logs
-!logs/.gitkeep   # Keep directory structure in repo
+models/         # Downloaded Whisper models (large files)
+logs/           # Application logs
 *.log
 
 # OS

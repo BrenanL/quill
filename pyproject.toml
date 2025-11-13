@@ -1,0 +1,82 @@
+[project]
+name = "Quill"
+version = "0.1.0"
+description = "Local speech-to-text dictation tool using Whisper AI"
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Quill Development Team"}
+]
+
+dependencies = [
+    # Audio processing
+    "sounddevice>=0.4.6",
+    "numpy>=1.24.0",
+    "scipy>=1.11.0",  # For audio preprocessing
+
+    # Transcription
+    "faster-whisper>=1.0.0",
+    "torch>=2.0.0",  # Required by faster-whisper
+
+    # UI
+    "pystray>=0.19.5",
+    "Pillow>=10.0.0",  # For tray icons
+
+    # Hotkeys
+    "keyboard>=0.13.5",
+
+    # Text injection (Windows)
+    "pywin32>=306; sys_platform == 'win32'",
+
+    # Configuration
+    "pydantic>=2.5.0",
+    "ruamel.yaml>=0.18.0",
+
+    # Logging
+    "loguru>=0.7.0",
+
+    # Utilities
+    "requests>=2.31.0",  # For model downloads
+    "tqdm>=4.66.0",  # Progress bars
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.7.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=src/Quill --cov-report=term-missing"

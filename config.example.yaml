@@ -1,0 +1,121 @@
+# Quill Configuration File
+# Edit values below to customize behavior
+
+# Application Settings
+app:
+  # Auto-start service when Windows logs in
+  auto_start: false
+
+  # Log level: debug, info, warning, error
+  log_level: "info"
+
+  # Log file location (relative to app directory)
+  log_file: "logs/Quill.log"
+
+  # Maximum log file size before rotation (MB)
+  log_max_size_mb: 10
+
+# Transcription Settings
+transcription:
+  # Backend: "faster-whisper" (only option in MVP)
+  backend: "faster-whisper"
+
+  # Model size: tiny, base, small, medium, large
+  # Default: small (best balance of speed and quality)
+  model_size: "small"
+
+  # Device: cuda (GPU) or cpu
+  # Auto-detected if not specified
+  device: "cuda"
+
+  # Compute type: float16, int8, int8_float16
+  # int8 is faster, uses less memory, minimal quality loss
+  compute_type: "float16"
+
+  # Language: en (English only in MVP)
+  language: "en"
+
+  # Model lifecycle management
+  lifecycle:
+    # Load model when first needed (not at startup)
+    lazy_load: true
+
+    # Unload model after this many minutes of inactivity
+    # Set to 0 to keep loaded always
+    # Set to -1 to unload immediately after each use
+    unload_after_minutes: 5
+
+    # Show progress during model download/loading
+    show_progress: true
+
+# Audio Settings
+audio:
+  # Sample rate (Hz) - Whisper expects 16kHz
+  sample_rate: 16000
+
+  # Channels: 1 (mono)
+  channels: 1
+
+  # Chunk duration in seconds for processing
+  chunk_duration_seconds: 5
+
+  # Voice Activity Detection (VAD) threshold
+  # 0.0 = no VAD, 1.0 = very aggressive
+  vad_threshold: 0.0  # Disabled for MVP
+
+  # Noise reduction
+  # Simple noise gate: drop audio below this amplitude
+  noise_gate_threshold: 0.01
+
+# Hotkey Settings
+hotkeys:
+  # Toggle recording on/off
+  # Format: "modifier+modifier+key"
+  # Valid modifiers: ctrl, alt, shift, win
+  # Examples: "ctrl+shift+d", "ctrl+alt+r"
+  toggle_recording: "ctrl+shift+d"
+
+  # Emergency stop (force stop if stuck)
+  emergency_stop: "ctrl+shift+esc"
+
+# Text Injection Settings
+text_injection:
+  # Method: "win32" (Windows API), "clipboard" (fallback)
+  method: "win32"
+
+  # Typing speed simulation (characters per second)
+  # 0 = instant (might not work in some apps)
+  # 50-100 = natural typing speed
+  typing_speed_cps: 0  # Instant for MVP
+
+  # Delay between key events (milliseconds)
+  key_delay_ms: 10
+
+# UI Settings
+ui:
+  # Tray icon theme: "auto", "light", "dark"
+  tray_icon_theme: "auto"
+
+  # Show notifications for state changes
+  show_notifications: true
+
+  # Notification duration (seconds)
+  notification_duration_seconds: 3
+
+  # Flash success icon duration (milliseconds)
+  success_flash_duration_ms: 1000
+
+# Advanced Settings
+advanced:
+  # Maximum recording duration (seconds)
+  # Prevents infinite recording if user forgets
+  max_recording_duration_seconds: 300  # 5 minutes
+
+  # Queue sizes (number of chunks)
+  audio_queue_size: 50
+
+  # Retry attempts for model loading
+  model_load_retries: 3
+
+  # Timeout for transcription (seconds)
+  transcription_timeout_seconds: 60
