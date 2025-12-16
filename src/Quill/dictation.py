@@ -11,11 +11,55 @@ Usage:
     python -m Quill.dictation
 """
 
+import os
 import sys
 import time
 import threading
 from pathlib import Path
 from typing import Optional, List, Any, Dict
+
+# Add NVIDIA DLL directories for CUDA support on Windows (safe to fail on CPU-only machines)
+def _setup_cuda_dlls() -> list[str]:
+    """Set up CUDA DLL paths on Windows. Returns list of paths added (empty if none/not Windows)."""
+    if sys.platform != "win32":
+        return []
+
+    added = []
+
+    # Method 1: Direct import (preferred)
+    try:
+        import nvidia.cudnn
+        import nvidia.cublas
+
+        for pkg in [nvidia.cudnn, nvidia.cublas]:
+            if hasattr(pkg, '__path__') and pkg.__path__:
+                dll_path = Path(list(pkg.__path__)[0]) / "bin"
+                if dll_path.exists():
+                    os.add_dll_directory(str(dll_path))
+                    os.environ['PATH'] = str(dll_path) + os.pathsep + os.environ.get('PATH', '')
+                    added.append(str(dll_path))
+    except (ImportError, Exception):
+        pass  # CUDA packages not installed, that's fine
+
+    # Method 2: Fallback to site-packages search
+    if not added:
+        try:
+            import site
+            for site_dir in site.getsitepackages():
+                nvidia_dir = Path(site_dir) / "nvidia"
+                if nvidia_dir.exists():
+                    for subdir in ["cudnn", "cublas"]:
+                        dll_path = nvidia_dir / subdir / "bin"
+                        if dll_path.exists():
+                            os.add_dll_directory(str(dll_path))
+                            os.environ['PATH'] = str(dll_path) + os.pathsep + os.environ.get('PATH', '')
+                            added.append(str(dll_path))
+        except Exception:
+            pass  # Any error here is fine, just means no CUDA
+
+    return added
+
+_CUDA_DLL_PATHS = _setup_cuda_dlls()
 
 import numpy as np
 import sounddevice as sd
@@ -441,6 +485,16 @@ class DictationService:
         print("=" * 50)
         print("Quill Dictation Service")
         print("=" * 50)
+
+        # Show device configuration
+        print(f"\nDevice: {DEVICE.upper()}")
+        print(f"  Compute type: {COMPUTE_TYPE}")
+        print(f"  Model: {MODEL_SIZE}")
+        if sys.platform == "win32":
+            if _CUDA_DLL_PATHS:
+                print(f"  CUDA DLLs: Found ({len(_CUDA_DLL_PATHS)} paths)")
+            else:
+                print(f"  CUDA DLLs: Not found (will use CPU if device=cuda fails)")
 
         # Load model
         self.load_model()
