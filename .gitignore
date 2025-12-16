@@ -7,8 +7,7 @@ __pycache__/
 
 # Virtual environments
 .venv/
-.venvpwsh/  # PowerShell venv
-venvpwsh/
+.venvpwsh/
 venv/
 ENV/
 env/
@@ -51,9 +50,9 @@ dmypy.json
 *~
 
 # Quill-specific
-config.yaml      # User configuration (sensitive)
-models/         # Downloaded Whisper models (large files)
-logs/           # Application logs
+config.yaml
+models/
+logs/
 *.log
 
 # OS
