@@ -427,7 +427,7 @@ class DictationService:
                 else:
                     print("    (no audio recorded)")
 
-            print("\nReady. Press Ctrl+Shift+D to start recording.")
+            print(f"\nReady. Press {HOTKEY.upper()} to start recording.")
 
     def toggle_recording(self):
         """Toggle recording state."""
@@ -459,10 +459,15 @@ class DictationService:
             print(f"\nMode: BATCH (transcribe at end)")
             print("  (Edit STREAMING_ENABLED=True in dictation.py to enable streaming)")
 
-        # Register hotkey
-        keyboard.add_hotkey(HOTKEY, self.toggle_recording)
+        # Register hotkey (suppress=True prevents key from passing through to apps)
+        # Callback must return quickly for suppression to work, so run in thread
+        keyboard.add_hotkey(
+            HOTKEY,
+            lambda: threading.Thread(target=self.toggle_recording, daemon=True).start(),
+            suppress=True,
+        )
         print(f"\nHotkey: {HOTKEY.upper()}")
-        print("Ready. Press Ctrl+Shift+D to start recording.")
+        print(f"Ready. Press {HOTKEY.upper()} to start recording.")
         print("Press Ctrl+C to exit.\n")
 
         try:

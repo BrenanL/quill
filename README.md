@@ -164,7 +164,7 @@ cd $HOME\quill-stable
 # Set up venv and install (requires uv: https://docs.astral.sh/uv/)
 uv venv .venvpwsh
 .venvpwsh\Scripts\Activate.ps1
-uv pip install .
+uv pip install -e . # using standard command breaks for some reason, be sure to use `-e`
 
 # Configure
 copy config.example.yaml config.yaml
