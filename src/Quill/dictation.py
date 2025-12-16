@@ -14,36 +14,96 @@ Usage:
 import sys
 import time
 import threading
-from typing import Optional, List
+from pathlib import Path
+from typing import Optional, List, Any, Dict
 
 import numpy as np
 import sounddevice as sd
 import keyboard
+import torch
 from faster_whisper import WhisperModel
+from ruamel.yaml import YAML
 
 
 # =============================================================================
-# Configuration (hardcoded for simplicity)
+# Configuration Loading
 # =============================================================================
 
-HOTKEY = "ctrl+shift+d"
-MODEL_SIZE = "base"           # "base" is better for streaming than "tiny"
-DEVICE = "cpu"                # Or "cuda" if available
-COMPUTE_TYPE = "int8"         # CPU-compatible
-SAMPLE_RATE = 16000           # Whisper requirement
+def load_config() -> Dict[str, Any]:
+    """Load configuration from config.yaml, falling back to defaults."""
+    config_paths = [
+        Path("config.yaml"),
+        Path(__file__).parent.parent.parent / "config.yaml",  # repo root
+    ]
 
-# Streaming mode
-STREAMING_ENABLED = True      # Set to True for VAD-based chunking
-                              # Set to False for batch mode (transcribe all at end)
+    yaml = YAML()
+    config = {}
 
-# VAD settings (only used if STREAMING_ENABLED=True)
-MIN_CHUNK_SECONDS = 5.0       # Minimum audio before transcribing (for accuracy)
-MAX_CHUNK_SECONDS = 30.0      # Force transcribe after this duration
-VAD_THRESHOLD = 0.5           # Speech detection sensitivity (0-1)
-MIN_SILENCE_MS = 700          # Silence duration to consider speech ended
+    for config_path in config_paths:
+        if config_path.exists():
+            print(f"Loading config from: {config_path}")
+            with open(config_path, "r") as f:
+                config = yaml.load(f) or {}
+            break
 
-# Auto-stop settings
-AUTO_STOP_SILENCE_SECONDS = 20  # Auto-stop recording after this much silence
+    if not config:
+        print("No config.yaml found, using defaults")
+
+    return config
+
+
+def get_device_and_compute_type(config: Dict[str, Any]) -> tuple[str, str]:
+    """Determine device and compute type, with auto-detection."""
+    transcription = config.get("transcription", {})
+    device = transcription.get("device", "auto")
+    compute_type = transcription.get("compute_type", "auto")
+
+    # Auto-detect device
+    if device == "auto":
+        if torch.cuda.is_available():
+            device = "cuda"
+            print(f"CUDA available: using GPU ({torch.cuda.get_device_name(0)})")
+        else:
+            device = "cpu"
+            print("CUDA not available: using CPU")
+
+    # Auto-detect compute type based on device
+    if compute_type == "auto":
+        if device == "cuda":
+            compute_type = "float16"
+        else:
+            compute_type = "int8"  # CPU requires int8
+
+    return device, compute_type
+
+
+# Load configuration
+_config = load_config()
+
+# =============================================================================
+# Configuration Values (from config.yaml or defaults)
+# =============================================================================
+
+# Hotkey
+HOTKEY = _config.get("hotkeys", {}).get("toggle_recording", "ctrl+shift+d")
+
+# Transcription settings
+_transcription = _config.get("transcription", {})
+MODEL_SIZE = _transcription.get("model_size", "base")
+DEVICE, COMPUTE_TYPE = get_device_and_compute_type(_config)
+LANGUAGE = _transcription.get("language", "en")
+
+# Audio (fixed for Whisper)
+SAMPLE_RATE = 16000
+
+# Dictation/streaming settings
+_dictation = _config.get("dictation", {})
+STREAMING_ENABLED = _dictation.get("streaming_enabled", True)
+MIN_CHUNK_SECONDS = _dictation.get("min_chunk_seconds", 5.0)
+MAX_CHUNK_SECONDS = _dictation.get("max_chunk_seconds", 30.0)
+VAD_THRESHOLD = _dictation.get("vad_threshold", 0.5)
+MIN_SILENCE_MS = _dictation.get("min_silence_ms", 700)
+AUTO_STOP_SILENCE_SECONDS = _dictation.get("auto_stop_silence_seconds", 20)
 
 
 # =============================================================================
@@ -197,7 +257,7 @@ class DictationService:
 
         segments, _ = self.model.transcribe(
             audio,
-            language="en",
+            language=LANGUAGE,
             beam_size=3,  # Faster than default 5
             vad_filter=False,
         )

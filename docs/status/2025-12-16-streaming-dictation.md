@@ -136,10 +136,10 @@ streaming:
 ## Future Improvements
 
 ### Short-term
-- [ ] Implement Silero VAD streaming
-- [ ] Test with "base" and "small" models
-- [ ] Find optimal min_chunk_seconds for UX vs accuracy
-- [ ] Add GPU support for faster transcription
+- [x] Implement Silero VAD streaming
+- [x] Test with "base" and "small" models
+- [x] Find optimal min_chunk_seconds for UX vs accuracy
+- [x] Add GPU support for faster transcription
 
 ### Medium-term
 - [ ] Overlapping chunks with context (better accuracy at boundaries)
@@ -188,3 +188,44 @@ python tests/manual/test_layer3_microphone.py
 # Run regular pytest suite (excludes manual tests)
 pytest
 ```
+
+---
+
+## Update: Implementation Complete
+
+**Date:** 2025-12-16 (later same day)
+
+The proposed Silero VAD solution was implemented and is working. Additional features were added:
+
+### What Was Implemented
+1. **Silero VAD integration** - `src/Quill/audio/vad_detector.py` processes audio in 512-sample chunks as required by Silero
+2. **Minimum chunk duration** - 5 seconds minimum before transcribing (configurable)
+3. **GPU auto-detection** - automatically uses CUDA if available, falls back to CPU with appropriate compute type
+4. **Text normalization** - proper spacing between chunks (adds space after `.!?,;:` and between words)
+5. **Auto-stop on silence** - recording stops after 20s of no speech (configurable)
+6. **Config file support** - settings loaded from `config.yaml` with sensible defaults
+
+### Additional Files Created
+| File | Description |
+|------|-------------|
+| `src/Quill/audio/vad_detector.py` | Silero VAD detector with 512-sample chunk processing |
+| `start-quill.ps1` | PowerShell startup script |
+| `config.example.yaml` | Added `dictation:` section |
+| `README.md` | Added "Dictation Service" section |
+
+### Current Configuration Defaults
+```yaml
+dictation:
+  streaming_enabled: true
+  min_chunk_seconds: 5.0
+  max_chunk_seconds: 30.0
+  vad_threshold: 0.5
+  min_silence_ms: 700
+  auto_stop_silence_seconds: 20
+```
+
+### Known Working
+- Streaming mode with VAD produces accurate transcription
+- Text joins properly between chunks
+- Auto-stop prevents forgotten recordings
+- Works on both CPU (int8) and GPU (float16)

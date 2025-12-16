@@ -90,6 +90,30 @@ Edit `config.yaml` to customize:
 4. **Wait** - Whisper transcribes audio (1-3 seconds)
 5. **Text appears** - Transcription inserted at cursor
 
+## Dictation Service (Simple Mode)
+
+A lightweight dictation service is available for quick use:
+
+```powershell
+.venvpwsh\Scripts\Activate.ps1
+python -m Quill.dictation
+```
+
+Or use the startup script:
+```powershell
+.\start-quill.ps1
+```
+
+**Features:**
+- Streaming mode: text appears as you speak (after natural pauses)
+- Auto-stop: recording stops after 20s of silence
+- GPU auto-detection: uses CUDA if available
+- Configurable via `config.yaml` (see `dictation:` section)
+
+**Streaming vs Batch:**
+- `streaming_enabled: true` - transcribes chunks as you speak
+- `streaming_enabled: false` - transcribes all audio when you stop
+
 ## Architecture
 
 - **AudioCapture**: Records audio from microphone
@@ -110,6 +134,51 @@ ruff check src/ --fix
 
 # Type check
 mypy src/
+```
+
+## Stable Install (Tag & Deploy)
+
+To use Quill daily while developing, set up a separate stable installation from a tagged release.
+
+### Creating a Release
+
+```powershell
+# In your development repo
+cd D:\github\quill
+
+# Tag a working version
+git tag v0.1.0 -m "First stable release"
+git push origin v0.1.0  # optional, for backup
+```
+
+### Installing from a Tag
+
+```powershell
+# Clone to a separate directory
+git clone D:\github\quill $HOME\quill-stable --branch v0.1.0
+cd $HOME\quill-stable
+
+# Set up venv and install
+python -m venv .venvpwsh
+.venvpwsh\Scripts\Activate.ps1
+pip install uv
+uv pip install .
+
+# Configure
+copy config.example.yaml config.yaml
+
+# Run
+.\start-quill.ps1
+```
+
+### Updating to a New Release
+
+```powershell
+cd $HOME\quill-stable
+git fetch --tags
+git checkout v0.1.1
+.venvpwsh\Scripts\Activate.ps1
+uv pip install .
 ```
 
 ## Troubleshooting
