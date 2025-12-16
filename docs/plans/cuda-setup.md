@@ -170,3 +170,47 @@ pytest tests/whisper/test_compute_types.py::TestComputeTypes::test_cuda_float16_
 - [NVIDIA cuDNN Download](https://developer.nvidia.com/cudnn)
 - [ctranslate2 Documentation](https://opennmt.net/CTranslate2/)
 - [faster-whisper GitHub](https://github.com/SYSTRAN/faster-whisper)
+
+---
+
+## Solution Implemented (2025-12-16)
+
+### Status: WORKING
+
+CUDA GPU acceleration is now working for faster-whisper transcription.
+
+### What We Did
+
+1. **Installed CUDA libraries via pip** (simplest approach):
+   ```powershell
+   uv pip install nvidia-cudnn-cu12 nvidia-cublas-cu12
+   ```
+
+2. **Updated DLL loading in `src/Quill/dictation.py`**:
+   - Added `_setup_cuda_dlls()` function that runs at import time
+   - Uses direct package import (`nvidia.cudnn`, `nvidia.cublas`) to find DLL paths
+   - Adds paths to BOTH `os.add_dll_directory()` AND `os.environ['PATH']`
+   - The PATH addition is critical - cuDNN DLLs are loaded lazily during transcription
+   - Silently fails on CPU-only machines (no errors, just falls back to CPU)
+
+3. **Created manual CUDA test** at `tests/manual/test_cuda.py`:
+   - `python tests/manual/test_cuda.py` - basic CUDA tests
+   - `python tests/manual/test_cuda.py --mic` - live microphone test (small model)
+   - `python tests/manual/test_cuda.py --mic-medium` - live mic with medium model
+
+4. **Added clear device status output** to dictation service startup:
+   - Shows device (CUDA/CPU), compute type, model size
+   - Shows whether CUDA DLLs were found
+
+### Key Technical Insight
+
+`os.add_dll_directory()` alone is NOT sufficient. ctranslate2 loads cuDNN DLLs lazily during transcription (not at import time), and uses standard `LoadLibrary()` which searches PATH. You must also add to `os.environ['PATH']`:
+
+```python
+os.add_dll_directory(str(dll_path))
+os.environ['PATH'] = str(dll_path) + os.pathsep + os.environ.get('PATH', '')
+```
+
+### Note on PyTorch CUDA
+
+PyTorch CUDA (`torch.cuda.is_available()`) is NOT required. faster-whisper uses ctranslate2's own CUDA backend, which is separate from PyTorch. You can have CPU-only PyTorch and still use GPU transcription.
