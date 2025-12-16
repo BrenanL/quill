@@ -19,6 +19,9 @@ dependencies = [
     "faster-whisper>=1.0.0",
     "torch>=2.0.0",  # Required by faster-whisper
 
+    # Voice Activity Detection
+    "silero-vad>=5.1",
+
     # UI
     "pystray>=0.19.5",
     "Pillow>=10.0.0",  # For tray icons

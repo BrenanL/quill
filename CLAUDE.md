@@ -220,10 +220,10 @@ Tray icon updates reflect current state with visual feedback.
 - **English only:** Multi-language support deferred
 - **No streaming:** Batch transcription only (entire recording processed at once)
 
-## Development Notes
+## IMPORTANT DEVELOPMENT NOTES TO REMEMBER
 
 - Follow user's global instructions: always use `.venv`, avoid `git commit` without explicit instruction
-- use `uv` for python packages
+- use `uv` for python packages. Do not just use `pip`
 - Code formatting: use `black` and `ruff`
 - Type hints: use `mypy` for validation
 - Commit style: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`
