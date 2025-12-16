@@ -26,12 +26,11 @@ Local speech-to-text dictation tool using OpenAI's Whisper AI.
 git clone <repository-url>
 cd quill
 
-# Create virtual environment
-python -m venv .venv
+# Create virtual environment (requires uv: https://docs.astral.sh/uv/)
+uv venv .venv
 source .venv/bin/activate
 
 # Install dependencies
-pip install uv
 uv pip install -e ".[dev]"
 
 # Copy example config
@@ -43,12 +42,11 @@ cp config.example.yaml config.yaml
 # Navigate to repository
 cd quill
 
-# Create virtual environment
-python -m venv .venvpwsh
+# Create virtual environment (requires uv: https://docs.astral.sh/uv/)
+uv venv .venvpwsh
 .venvpwsh\Scripts\Activate.ps1
 
 # Install dependencies
-pip install uv
 uv pip install -e ".[dev]"
 
 # Copy example config
@@ -155,13 +153,17 @@ git push origin v0.1.0  # optional, for backup
 
 ```powershell
 # Clone to a separate directory
+## Installing locally:
 git clone D:\github\quill $HOME\quill-stable --branch v0.1.0
+
+## Installing remotely:
+git clone https://github.com/BrenanL/quill.git $HOME\quill-stable --branch v0.1.0
+
 cd $HOME\quill-stable
 
-# Set up venv and install
-python -m venv .venvpwsh
+# Set up venv and install (requires uv: https://docs.astral.sh/uv/)
+uv venv .venvpwsh
 .venvpwsh\Scripts\Activate.ps1
-pip install uv
 uv pip install .
 
 # Configure

@@ -20,20 +20,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Setup
 
+**IMPORTANT: Always use `uv` for all Python package and environment operations. Never use plain `pip`.**
+
 ```bash
 # Repository location
 cd /mnt/d/github/quill
 
-# Virtual environment (REQUIRED - per user's global instructions)
+# Create virtual environment with uv (if needed)
+uv venv .venv  # Linux/WSL
+uv venv .venvpwsh  # Windows PowerShell
+
+# Activate virtual environment (REQUIRED - per user's global instructions)
 source .venv/bin/activate  # Linux/WSL
 # OR
 .venv\Scripts\activate  # Windows
 
-# Install dependencies (when pyproject.toml exists)
-pip install uv
+# Install dependencies - ALWAYS use uv, never pip
 uv pip install -e ".[dev]"
-# OR
-pip install -e ".[dev]"
 
 # Create directories
 mkdir -p models logs src/Quill
@@ -223,7 +226,7 @@ Tray icon updates reflect current state with visual feedback.
 ## IMPORTANT DEVELOPMENT NOTES TO REMEMBER
 
 - Follow user's global instructions: always use `.venv`, avoid `git commit` without explicit instruction
-- use `uv` for python packages. Do not just use `pip`
+- **ALWAYS use `uv` for ALL Python operations**: `uv venv` for environments, `uv pip install` for packages. NEVER use plain `pip` or `python -m venv`
 - Code formatting: use `black` and `ruff`
 - Type hints: use `mypy` for validation
 - Commit style: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`
